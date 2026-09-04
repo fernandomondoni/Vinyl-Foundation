@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Vinyl.Identity.Adapters</RootNamespace>
+    <AssemblyName>Vinyl.Identity.Adapters</AssemblyName>
+    <UserSecretsId>51576d51-555f-431c-a579-c4db9fbda04e</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference Include="..\Vinyl.Identity.Application\Vinyl.Identity.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.CognitoIdentityProvider" />
+    <PackageReference Include="Marten" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+  </ItemGroup>
+</Project>

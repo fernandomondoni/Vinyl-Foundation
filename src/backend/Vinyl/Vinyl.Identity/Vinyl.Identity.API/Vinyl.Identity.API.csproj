@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <RootNamespace>Vinyl.Identity.API</RootNamespace>
+    <AssemblyName>Vinyl.Identity.API</AssemblyName>
+    <UserSecretsId>vinyl-identity-api</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Vinyl.Identity.Application\Vinyl.Identity.Application.csproj" />
+    <ProjectReference Include="..\Vinyl.Identity.Adapters\Vinyl.Identity.Adapters.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Serilog.AspNetCore" />
+    <PackageReference Include="Serilog.Sinks.Console" />
+  </ItemGroup>
+</Project>

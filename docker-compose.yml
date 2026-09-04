@@ -1,0 +1,21 @@
+services:
+  vinyl-identity-postgres:
+    image: postgres:17-alpine
+    container_name: vinyl-identity-postgres
+    environment:
+      POSTGRES_DB: vinyl_identity
+      POSTGRES_USER: vinyl
+      POSTGRES_PASSWORD: ${VINYL_POSTGRES_PASSWORD:-vinyl-local-password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - vinyl_identity_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vinyl -d vinyl_identity"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+volumes:
+  vinyl_identity_postgres_data:

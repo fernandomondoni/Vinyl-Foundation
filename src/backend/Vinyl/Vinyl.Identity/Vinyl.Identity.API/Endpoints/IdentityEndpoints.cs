@@ -15,6 +15,12 @@ public static class IdentityEndpoints
             .Produces<CurrentUserOutput>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status401Unauthorized);
 
+        endpoints.MapGet("/api/identity/me/access", GetCurrentUserContentAccess)
+            .RequireAuthorization()
+            .WithName("GetCurrentUserContentAccess")
+            .Produces<ContentAccessOutput>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status401Unauthorized);
+
         return endpoints;
     }
 
@@ -37,5 +43,25 @@ public static class IdentityEndpoints
             user.Profile.DisplayName,
             user.Status.ToString(),
             context.Roles));
+    }
+
+    private static async Task<IResult> GetCurrentUserContentAccess(
+        IAuthenticatedUserContextAccessor contextAccessor,
+        IUserIdentityService userIdentityService,
+        IContentAccessService contentAccessService,
+        CancellationToken cancellationToken)
+    {
+        var context = contextAccessor.Current;
+        if (context is null)
+        {
+            return Results.Unauthorized();
+        }
+
+        var user = await userIdentityService.GetOrCreateAsync(context, cancellationToken);
+        var access = await contentAccessService.GetForUserAsync(
+            user.Id,
+            cancellationToken);
+
+        return Results.Ok(ContentAccessOutput.From(access));
     }
 }

@@ -6,10 +6,29 @@ Serviço responsável pelo domínio de identidade e autorização do Vinyl.
 
 - Amazon Cognito User Pool para autenticação e emissão de tokens;
 - Usuário, perfil, workspace, membership, role e permission no domínio do Vinyl;
+- Plano de assinatura individual e avaliação de acesso a conteúdo gratuito ou Premium;
 - Validação de access tokens OIDC/JWT nas APIs;
 - Provisionamento do usuário local no primeiro acesso autenticado;
 - Persistência em PostgreSQL com Marten quando configurada;
 - Persistência em memória somente para desenvolvimento local.
+
+## Modelo de ownership
+
+O modelo inicial do Vinyl é híbrido:
+
+- dados pessoais, como coleção, favoritos e listas do usuário, devem ser
+  associados ao `UserId`;
+- o plano e a assinatura Premium pertencem ao usuário;
+- `Workspace` é opcional e deve ser usado somente para dados compartilhados,
+  como uma coleção de uma loja, clube ou equipe;
+- `Membership` e `Role` controlam apenas colaboração e administração dentro de
+  um workspace;
+- endpoints de dados pessoais não devem exigir o header `X-Workspace-Id`;
+- endpoints de dados compartilhados devem exigir um workspace e validar a
+  membership ativa do usuário.
+
+Uma role nunca deve liberar conteúdo Premium por si só. O acesso a conteúdo é
+determinado pela assinatura do usuário através do `IContentAccessService`.
 
 ## Executar localmente
 
@@ -84,6 +103,7 @@ Não versionar valores de conexão, client secrets ou outros segredos. Em AWS, e
 - `GET /health/live` - liveness;
 - `GET /health/ready` - readiness inicial;
 - `GET /api/identity/me` - usuário autenticado e provisionado localmente;
+- `GET /api/identity/me/access` - plano efetivo e acesso do usuário a conteúdo Premium;
 - `GET /api/workspaces` - workspaces do usuário autenticado;
 - `GET /api/workspaces/{workspaceId}` - workspace acessível pelo usuário autenticado;
 - `POST /api/workspaces` - cria um workspace e atribui a role `Owner` ao usuário autenticado;
@@ -164,8 +184,20 @@ curl -X DELETE http://localhost:5080/api/workspaces/WORKSPACE_ID/members/USER_ID
   -H "X-Workspace-Id: WORKSPACE_ID"
 ```
 
+Consultar o acesso a conteúdo:
+
+```bash
+curl http://localhost:5080/api/identity/me/access -H "Authorization: Bearer SEU_ACCESS_TOKEN"
+```
+
+Sem uma assinatura Premium ativa, a resposta representa o plano `Free` e
+`canAccessPremiumContent` será `false`. Conteúdo com nível `Free` permanece
+acessível; conteúdo `Premium` deve consultar `IContentAccessService` no
+endpoint responsável pelo conteúdo.
+
 No PostgreSQL com Marten, os documentos são armazenados inicialmente em:
 
 - `vinyl_identity.mt_doc_user`;
 - `vinyl_identity.mt_doc_workspace`;
 - `vinyl_identity.mt_doc_membership`.
+- `vinyl_identity.mt_doc_user_subscription`.

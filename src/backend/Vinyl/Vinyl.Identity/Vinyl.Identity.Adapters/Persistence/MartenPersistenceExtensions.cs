@@ -18,6 +18,7 @@ public static class MartenPersistenceExtensions
         if (string.Equals(provider, "memory", StringComparison.OrdinalIgnoreCase))
         {
             services.AddSingleton<IUserRepository, InMemoryUserRepository>();
+            services.AddSingleton<IUserSubscriptionRepository, InMemoryUserSubscriptionRepository>();
             services.AddSingleton<IWorkspaceRepository, InMemoryWorkspaceRepository>();
             return services;
         }
@@ -44,10 +45,13 @@ public static class MartenPersistenceExtensions
                 ? AutoCreate.CreateOrUpdate
                 : AutoCreate.None;
             options.Schema.For<User>().Identity(user => user.Id);
+            options.Schema.For<UserSubscription>().Identity(subscription => subscription.Id);
+            options.Schema.For<SubscriptionEventReceipt>().Identity(receipt => receipt.Id);
             options.Schema.For<Workspace>().Identity(workspace => workspace.Id);
             options.Schema.For<Membership>().Identity(membership => membership.Id);
         });
         services.AddScoped<IUserRepository, MartenUserRepository>();
+        services.AddScoped<IUserSubscriptionRepository, MartenUserSubscriptionRepository>();
         services.AddScoped<IWorkspaceRepository, MartenWorkspaceRepository>();
         return services;
     }
